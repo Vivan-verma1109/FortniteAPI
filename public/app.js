@@ -1,5 +1,4 @@
-// Fetch shop data and display it on the webpage
-fetch('/api/shop')
+fetch('http://localhost:3000/api/shop') // Explicit URL
   .then((response) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
