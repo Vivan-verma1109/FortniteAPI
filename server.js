@@ -1,80 +1,41 @@
 const express = require("express");
-const axios = require("axios");
 const cors = require("cors");
+const axios = require("axios");
 const path = require("path");
 
 const app = express();
+const PORT = 3000;
 
-// Middleware to allow CORS and serve static files
-app.use(cors({ origin: "http://localhost:3000" })); // Allow CORS for frontend requests
-app.use(express.static(path.join(__dirname, "public"))); // Serve static files from the 'public' folder
+app.use(cors({ origin: "http://localhost:3000" }));
+app.use(express.static(path.join(__dirname, "public")));
 
-// Helper function to build a lookup table for cosmetics by normalized name
-const buildCosmeticsLookup = (cosmeticsData) => {
-  const lookup = {};
-  cosmeticsData.forEach((cosmetic) => {
-    if (cosmetic.name) {
-      const normalizedCosmeticName = cosmetic.name.trim().toLowerCase();
-      lookup[normalizedCosmeticName] = cosmetic;
-    }
-  });
-  return lookup;
-};
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
-// Helper function to normalize shop item names from devName
-const normalizeShopItemName = (devName) => {
-  const match = devName.match(/x\s(.+)\sfor/);
-  return match ? match[1].trim().toLowerCase() : null;
-};
-
-// Endpoint to fetch Fortnite shop data with images
 app.get("/api/shop", async (req, res) => {
   try {
-    console.log("Received request for /api/shop");
+    console.log("Fetching shop data...");
 
-    // Fetch shop data
+    // Use axios instead of fetch
     const shopResponse = await axios.get("https://fortnite-api.com/v2/shop");
     const shopData = shopResponse.data;
 
-    // Fetch cosmetics data from the updated endpoint
-    const cosmeticsResponse = await axios.get("https://fortnite-api.com/v2/cosmetics/br");
-    const cosmeticsData = cosmeticsResponse.data.data || [];
+    if (!shopData || !shopData.data) {
+      return res.status(500).json({ error: "Invalid shop data from API" });
+    }
 
-    // Build a lookup table for cosmetics
-    const cosmeticsLookup = buildCosmeticsLookup(cosmeticsData);
+    const shopItems = shopData.data.entries.slice(0, 7).map((item) => ({
+      devName: item.devName,
+      finalPrice: item.finalPrice || "Unknown",
+      image: item.images?.icon || "https://via.placeholder.com/100?text=No+Image",
+    }));
 
-    // Process shop data and attach images
-    const shopWithImages = shopData.data.entries.map((shopItem) => {
-      const normalizedShopItemName = normalizeShopItemName(shopItem.devName);
-
-      const matchingCosmetic =
-        normalizedShopItemName && cosmeticsLookup[normalizedShopItemName];
-
-        let mismatchLogged = false;
-
-        if (matchingCosmetic) {
-          console.log(`Match found for Shop Item: "${shopItem.devName}"`);
-          console.log('Matching Cosmetic:', matchingCosmetic);
-        } else if (!mismatchLogged) {
-          console.warn(`No match found for Shop Item: "${shopItem.devName}"`);
-          mismatchLogged = true;
-        }
-        
-        
-
-      return {
-        ...shopItem,
-        image: matchingCosmetic?.images?.icon || "https://via.placeholder.com/100?text=No+Image",
-      };
-    });
-
-    res.json(shopWithImages);
+    res.json(shopItems);
   } catch (error) {
-    console.error("Error fetching data:", error.message);
-    res.status(500).json({ error: "Failed to fetch item shop data with images" });
+    console.error("Error fetching shop data:", error.message);
+    res.status(500).json({ error: "Failed to fetch item shop data" });
   }
 });
 
-// Start the server
-const PORT = 3000;
-app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));

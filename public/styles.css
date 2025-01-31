@@ -1,0 +1,25 @@
+.image-container {
+    width: 100px;
+    height: 100px;
+    background-color: #ddd; /* Light gray placeholder */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 5px;
+    position: relative;
+  }
+  
+  .image-container img {
+    display: block;
+    width: 100%; /* Scale to fit the container */
+    height: 100%; /* Maintain size stability */
+    object-fit: cover; /* Crop or fit the image neatly */
+    transition: opacity 0.3s ease-in-out; /* Smooth fade-in effect */
+    opacity: 0; /* Start invisible */
+  }
+  
+  .image-container img.loaded {
+    opacity: 1; /* Fade in when loaded */
+  }
+  
