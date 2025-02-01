@@ -1,25 +1,95 @@
-.image-container {
-    width: 100px;
-    height: 100px;
-    background-color: #ddd; /* Light gray placeholder */
+/* Reset default margins and paddings */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212; /* Dark mode background */
+    color: #fff;
+    margin: 0;
+    padding: 0;
     display: flex;
-    align-items: center;
     justify-content: center;
-    overflow: hidden;
-    border-radius: 5px;
-    position: relative;
-  }
-  
-  .image-container img {
-    display: block;
-    width: 100%; /* Scale to fit the container */
-    height: 100%; /* Maintain size stability */
-    object-fit: cover; /* Crop or fit the image neatly */
-    transition: opacity 0.3s ease-in-out; /* Smooth fade-in effect */
-    opacity: 0; /* Start invisible */
-  }
-  
-  .image-container img.loaded {
-    opacity: 1; /* Fade in when loaded */
-  }
-  
+    align-items: center;
+    height: 100vh;
+}
+
+/* Main container holding the items */
+.shop-container {
+    text-align: center;
+    max-width: 1200px;
+    margin: 20px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.8); /* Darker background with transparency */
+    border-radius: 10px;
+    width: 100%;
+}
+
+/* Title style */
+h1 {
+    font-size: 3rem;
+    margin-bottom: 30px;
+}
+
+/* Flexbox container for the items */
+.items-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+/* Individual item card styling */
+.item {
+    background-color: #3e3e3e;
+    padding: 15px;
+    border-radius: 10px;
+    width: 200px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease-in-out;
+}
+
+.item:hover {
+    transform: scale(1.05);
+}
+
+/* Item image styling */
+.item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+/* Item name styling */
+.item h2 {
+    font-size: 1.2rem;
+    color: #fff;
+    margin-top: 10px;
+}
+
+/* Item price styling */
+.item .price {
+    font-size: 1rem;
+    color: #f4d03f; /* V-Bucks yellow */
+    margin-top: 5px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .items-list {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .item {
+        width: 80%;
+        margin-bottom: 20px;
+    }
+}

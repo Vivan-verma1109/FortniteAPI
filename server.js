@@ -1,41 +1,40 @@
-const express = require("express");
-const cors = require("cors");
-const axios = require("axios");
-const path = require("path");
+const express = require('express');
+const axios = require('axios');
+const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-app.use(cors({ origin: "http://localhost:3000" }));
-app.use(express.static(path.join(__dirname, "public")));
+// Serve static files (e.g., index.html, styles.css)
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
+// Endpoint to fetch item data
+app.get('/items', async (req, res) => {
+    try {
+        const response = await axios.get('https://fortnite-api.com/v2/shop');
+        const entries = response.data.data.entries;
 
-app.get("/api/shop", async (req, res) => {
-  try {
-    console.log("Fetching shop data...");
+        // Get items with brItems and relevant data
+        const formattedData = entries
+            .filter(entry => entry.brItems && entry.brItems.length > 0)
+            .map(entry => {
+                const brItem = entry.brItems[0];
+                return {
+                    id: brItem.id,
+                    name: brItem.name,
+                    imageUrl: brItem.images && brItem.images.icon,
+                    price: entry.finalPrice // Assuming `finalPrice` is the price in V-Bucks
+                };
+            });
 
-    // Use axios instead of fetch
-    const shopResponse = await axios.get("https://fortnite-api.com/v2/shop");
-    const shopData = shopResponse.data;
-
-    if (!shopData || !shopData.data) {
-      return res.status(500).json({ error: "Invalid shop data from API" });
+        res.json(formattedData); // Send the item data to the frontend
+    } catch (error) {
+        console.error('Error fetching Fortnite shop data:', error);
+        res.status(500).json({ error: 'Failed to fetch data' });
     }
-
-    const shopItems = shopData.data.entries.slice(0, 7).map((item) => ({
-      devName: item.devName,
-      finalPrice: item.finalPrice || "Unknown",
-      image: item.images?.icon || "https://via.placeholder.com/100?text=No+Image",
-    }));
-
-    res.json(shopItems);
-  } catch (error) {
-    console.error("Error fetching shop data:", error.message);
-    res.status(500).json({ error: "Failed to fetch item shop data" });
-  }
 });
 
-app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
+// Start the server
+app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+});
