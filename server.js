@@ -20,22 +20,39 @@ app.get('/items', async (req, res) => {
             if (entry.brItems && entry.brItems.length > 0) {
                 entry.brItems.forEach(brItem => {
                     const setName = brItem.set?.value || 'No Set';
+                    const itemName = brItem.name;
 
                     if (!groupedItems[setName]) {
-                        groupedItems[setName] = [];
+                        groupedItems[setName] = {};
                     }
 
-                    groupedItems[setName].push({
-                        id: brItem.id,
-                        name: brItem.name,
-                        imageUrl: brItem.images?.icon || null,
-                        price: entry.finalPrice
-                    });
+                    if (!groupedItems[setName][itemName]) {
+                        groupedItems[setName][itemName] = {
+                            id: brItem.id,
+                            name: itemName,
+                            price: entry.finalPrice,
+                            imageUrl: brItem.images?.icon || null,
+                            variations: []
+                        };
+                    }
+
+                    // Store variations (if any)
+                    if (brItem.variants && brItem.variants.length > 0) {
+                        brItem.variants.forEach(variant => {
+                            groupedItems[setName][itemName].variations.push(variant);
+                        });
+                    }
                 });
             }
         });
 
-        res.json(groupedItems);
+        // Convert grouped object into an array format for frontend
+        const formattedData = {};
+        Object.keys(groupedItems).forEach(setName => {
+            formattedData[setName] = Object.values(groupedItems[setName]);
+        });
+
+        res.json(formattedData);
     } catch (error) {
         console.error('Error fetching Fortnite shop data:', error);
         res.status(500).json({ error: 'Failed to fetch data' });
