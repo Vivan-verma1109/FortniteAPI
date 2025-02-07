@@ -14,20 +14,28 @@ app.get('/items', async (req, res) => {
         const response = await axios.get('https://fortnite-api.com/v2/shop');
         const entries = response.data.data.entries;
 
-        // Get items with brItems and relevant data
-        const formattedData = entries
-            .filter(entry => entry.brItems && entry.brItems.length > 0)
-            .map(entry => {
-                const brItem = entry.brItems[0];
-                return {
-                    id: brItem.id,
-                    name: brItem.name,
-                    imageUrl: brItem.images && brItem.images.icon,
-                    price: entry.finalPrice // Assuming `finalPrice` is the price in V-Bucks
-                };
-            });
+        const groupedItems = {};
 
-        res.json(formattedData); // Send the item data to the frontend
+        entries.forEach(entry => {
+            if (entry.brItems && entry.brItems.length > 0) {
+                entry.brItems.forEach(brItem => {
+                    const setName = brItem.set?.value || 'No Set';
+
+                    if (!groupedItems[setName]) {
+                        groupedItems[setName] = [];
+                    }
+
+                    groupedItems[setName].push({
+                        id: brItem.id,
+                        name: brItem.name,
+                        imageUrl: brItem.images?.icon || null,
+                        price: entry.finalPrice
+                    });
+                });
+            }
+        });
+
+        res.json(groupedItems);
     } catch (error) {
         console.error('Error fetching Fortnite shop data:', error);
         res.status(500).json({ error: 'Failed to fetch data' });
