@@ -1,6 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const itemsContainer = document.getElementById('items');
-  
+    const shopContainer = document.querySelector('.shop-container');
+
+    // Create a container for horizontal scrolling
+    const setContainer = document.createElement('div');
+    setContainer.classList.add('set-container');
+    shopContainer.appendChild(setContainer);
+
     // Fetch grouped item data from the server
     fetch('/items')
         .then(response => response.json())
@@ -9,32 +14,36 @@ document.addEventListener('DOMContentLoaded', () => {
             Object.keys(data).forEach(setName => {
                 const setDiv = document.createElement('div');
                 setDiv.classList.add('set-group');
-  
+
                 // Set title
-                const setTitle = document.createElement('h1');
+                const setTitle = document.createElement('h2');
                 setTitle.textContent = setName;
                 setDiv.appendChild(setTitle);
-  
+
+                // Items list inside the set
+                const itemsList = document.createElement('div');
+                itemsList.classList.add('items-list');
+
                 // Loop through items in this set
                 data[setName].forEach(item => {
                     const itemDiv = document.createElement('div');
                     itemDiv.classList.add('item');
-                    
+
                     itemDiv.innerHTML = `
                         <img src="${item.imageUrl}" alt="${item.name}" class="item-image"/>
-                        <h2>${item.name}</h2>
+                        <h3>${item.name}</h3>
                         <p class="price">${item.price} V-Bucks</p>
                     `;
-                    
-                    setDiv.appendChild(itemDiv);
+
+                    itemsList.appendChild(itemDiv);
                 });
-  
-                // Append set group to the container
-                itemsContainer.appendChild(setDiv);
+
+                // Append items list inside the set group
+                setDiv.appendChild(itemsList);
+                setContainer.appendChild(setDiv);
             });
         })
         .catch(error => {
             console.error('Error loading items:', error);
         });
-  });
-  
+});
